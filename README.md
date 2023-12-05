@@ -333,8 +333,8 @@ For clarity, when you run the standard library as an executable, it will display
 The standard library is built automatically with make, but it can also be built manually:
 ```bash
     $ cd src/asm_strlib
-    $ nasm -f elf64 stdlib.asm                        # Сборка объектного файла
-    $ ld -e stub_entry -s -S stdlib.o -o stdlib.out # Сборка бинарного файла
+    $ nasm -f elf64 stdlib.asm                        # Build the object file
+    $ ld -e stub_entry -s -S stdlib.o -o stdlib.out # Build a binary file
 ```
 
 The executable is used when adding standard library code to the generated binary. The compiler loads `stdlib.out`, analyzes its ELF header, and copies the code it contains

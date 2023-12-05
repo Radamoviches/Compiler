@@ -131,7 +131,7 @@ as an internal representation instead of AST.
 Let's build an AST for the example from the syntax help:
 
 <details>
-  <summary><b>Полный код примера</b></summary>
+  <summary><b>Full example code</b></summary>
 
 ```rust
 ~sya~

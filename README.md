@@ -11,7 +11,7 @@ In a particular case - from ReverseLang into an executable ELF file for amd64 ar
 
 To build the compiler, run the commands:
 ```bash
-$ git clone https://github.com/Radamoviches/x64_compiler # Clone the repository
+$ git clone https://github.com/Radamoviches/Compiler # Clone the repository
 $ cd x64_compiler && make all                         # Build all necessary binaries
 ```
 

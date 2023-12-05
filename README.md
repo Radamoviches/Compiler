@@ -216,7 +216,7 @@ In this case, IR is designed for an abstract stack processor, and therefore has 
 All instructions absorb their operands, if any, and place it on top of the stack if there is a return value. 
 
 ### ELF file structure
-![img.png](images/self_structure.png)
+![img.png](images/elf_structure.png)
 
 As a result of compilation, an executable ELF file containing the translated code and standard library code is created.
 

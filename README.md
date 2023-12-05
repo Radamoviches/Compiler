@@ -40,7 +40,7 @@ For example, to compile and run a program to solve a quadratic equation availabl
 
 
 <details>
-  <summary>Грамматика</summary>
+  <summary>Syntax </summary>
 
 ```
 Program        ::= PROG_BEG (SubProgram | Func)* PROG_END

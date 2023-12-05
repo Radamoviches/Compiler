@@ -1,23 +1,23 @@
-# Нативный компилятор ReverseLang под архитектуру x64
+## ReverseLang native compiler for x64 architecture
 
-##  Описание
+## Description
 
-Компилятор — программа, переводящая написанный на языке программирования текст в бинарный исполняемый файл.
-В конкретном случае — с ReverseLang в исполняемый ELF файл для архитектуры amd64. С синтаксисом ReverseLang можно ознакомится в 
-[разделе с краткой справкой](#синтаксис-reverselang).
+A compiler is a program that translates text written in a programming language into a binary executable file.
+In a particular case - from ReverseLang into an executable ELF file for amd64 architecture. The syntax of ReverseLang can be found in the 
+[quick reference section](#syntax-reverseLang).
 
-## Использование
-### Сборка компилятора
+## Usage
+### Build the compiler
 
-Для сборки компилятора выполните команды:
+To build the compiler, run the commands:
 ```bash
-$ git clone https://github.com/foxidokun/x64_compiler # Склонировать репозиторий
-$ cd x64_compiler && make all                         # Собрать все необходимые бинарники
+$ git clone https://github.com/Radamoviches/x64_compiler # Clone the repository
+$ cd x64_compiler && make all                         # Build all necessary binaries
 ```
 
-Теперь для сборки ReverseLang достаточно воспользоваться скриптом `compile.sh`, передав ему два аргумента — файл с исходным кодом на языке Reverselang и путь, по которому сохранять скомпилированный исполняемый файл.
+Now to build ReverseLang it is enough to use the `compile.sh` script, passing it two arguments - a Reverselang source code file and a path where to save the compiled executable.
 
-Например, чтобы скомпилировать и запустить программу для решения квадратного уравнения, доступную в `examples/`:
+For example, to compile and run a program to solve a quadratic equation available in `examples/`:
 ```bash 
     $ ./compile.sh examples/quad.edoc /tmp/quad.bin
     $ /tmp/quad.bin  
@@ -29,14 +29,15 @@ $ cd x64_compiler && make all                         # Собрать все н
         OUTPUT: 3.00 # x = 3
 ```
 
-### Синтаксис ReverseLang
+### ReverseLang Syntax
 
-1. Все переменные имеют один тип — знаковые 64-битные числа.
-2. Все функции обязательно имеют возвращаемое значение.
-3. Стандартная библиотека языка содержит 3 функции: `input / output / sqrt`.
-4. С переменными можно проводить следующие математические операции: `+, -, /, *`.
-5. Доступны логические операции сравнения: `>, >=, <, <=`, а также логические И/ИЛИ (`&& и ||`) и отрицание (`!`).
-6. В языке есть поддержка функций, циклов while и if-else блоков.
+1. All variables have the same type - signed 64-bit numbers.
+2. All functions necessarily have a return value.
+3. The standard language library contains 3 functions: `input / output / sqrt`.
+4. The following mathematical operations can be performed on variables: `+, -, /, *`.
+5. Logical comparison operations are available: `>, >=, <, <=`, as well as logical AND/OR (`&& and |||`) and negation (`!``).
+6. The language has support for functions, while loops, and if-else blocks.
+
 
 <details>
   <summary>Грамматика</summary>
@@ -62,8 +63,8 @@ BuiltInFunc    ::= L_BRACKET Expression R_BRACKET (PRINT|SQRT|SIN)
 ```
 </details>
 
-Синтаксис ReverseLang является C-подобным с одной особенностью: каждую строку стоит читать справа налево. Так, например,
-следующий код на C
+The ReverseLang syntax is C-like with one feature: each line should be read from right to left. So, for example,
+the following C code
 ```c
 int func (int a, int b, int c) {
     int d = a / b;
@@ -75,7 +76,7 @@ int func (int a, int b, int c) {
     }   
 }
 ```
-на ReverseLang примет вид
+in ReverseLang will take the form
 ```rust
 (c, b, a) func fn
 [
@@ -89,45 +90,45 @@ int func (int a, int b, int c) {
 ]
 ```
 
-Полную версию этого примера, как и остальных, можно найти в директории `examples/`
+The full version of this example, as well as the others, can be found in the `examples/` directory
 
-## Принцип работы
+### Principle of operation
 
-### Архитектура компилятора
+### Compiler architecture
 
-Компилятор разбит на три ключевых компонента, поэтапно обрабатывающих исходный код и использующих в качестве внутреннего представления абстрактное 
-синтаксическое дерево (_abstract syntax tree_, AST). В синтаксическом дереве внутренние вершины сопоставлены с операторами языка программирования, а листья — с соответствующими операндами.
-Пример такого дерева приведен в конце этого раздела. 
+The compiler is organized into three key components that process source code step by step and use an abstract syntax tree (_abstract syntax tree_) as an internal representation. 
+syntax tree (_abstract syntax tree_, AST). In the syntax tree, the internal nodes are mapped to programming language operators, and the leaves are mapped to the corresponding operands.
+An example of such a tree is given at the end of this section. 
 
-**Фронтенд**
-1. Лексический анализ разбивает исходный код на логические кванты (лексемы) — числа, ключевые слова, имена переменных и функций.
-2. Синтаксический анализ собирает из лексем синтаксические конструкции, такие как функции и циклы, используя алгоритм рекурсивного спуска. 
-3. В процессе рекурсивного спуска строится абстрактное синтаксическое дерево, которое и является итоговым результатом работы фронтенда.
+**Frontend**
+1. lexical analysis breaks source code into logical quanta (tokens) - numbers, keywords, variable and function names.
+2. Syntactic analysis assembles syntactic constructs such as functions and loops from tokens using a recursive descent algorithm. 
+3. The recursive descent process builds an abstract syntax tree, which is the final output of the frontend.
 
-**Промежуточный оптимизатор (middleend)**
+**Intermediate Optimizer (middleend)**
 
-Оптимизатор принимает на вход AST и пытается упростить его, не нарушая при этом логику работы программы. В данный момент из оптимизаций применяется только вычисление 
-константных выражений: обнаружив конструкцию из математических или логических операций над числами, оптимизатор вычисляет ее и заменяет на результат. 
+The optimizer takes AST as input and tries to simplify it without breaking the program logic. At the moment, only calculation of constant expressions is used among the optimizations: having detected 
+constant expressions: having detected a construct from mathematical or logical operations on numbers, the optimizer calculates it and replaces it with the result. 
 
-**Бэкенд** 
+**Backend**. 
 
-Бэкенд принимает на вход оптимизированное AST дерево и, обходя его в postorder порядке, генерирет машинный код для каждой вершины.
-Таким образом при исполнении кода любой операции код вычисления ее операндов уже будет выполнен.
+The backend takes an optimized AST tree as input and, by traversing it in postorder, generates machine code for each vertex.
+Thus, when the code of any operation is executed, the code for calculating its operands will already be executed.
 
-#### Обоснование архитектуры компилятора
-Такая архитектура позволяет переиспользовать общие куски при адаптации компилятора под другие языки или под 
-другие архитектуры. Так, например, компиляторы одного языка под `x64` и `arm` могут использовать общие
-фронтенд и оптимизатор, а компиляторы двух разных языков под одну архитектуру могут переиспользовать оптимизатор и бэкенд.
+#### Rationale of the compiler architecture
+This architecture allows reusing common chunks when adapting the compiler for other languages or other architectures. 
+other architectures. So, for example, compilers of one language under `x64` and `arm` can use common
+frontend and optimizer, while compilers of two different languages for the same architecture may overuse the optimizer and backend.
 
-В данном случае, поскольку фронтенды языков [ICPC](https://github.com/diht404/language) и [kaban54's lang](https://github.com/kaban54/language) разработаны в совместном проекте с ReverseLang и
-имеют совместимый формат AST, их можно скомпилировать с использованием бэкенда ReverseLang.
+In this case, since the frontends of the languages [ICPC](https://github.com/diht404/language) and [kaban54's lang](https://github.com/kaban54/language) were developed in a joint project with ReverseLang and
+have a compatible AST format, they can be compiled using the ReverseLang backend.
 
-Подобная архитектура не является чем-то новым и применяется в семействе компиляторов `GCC`, а также в основанных на `llvm` компиляторах, правда в них в качестве 
-внутреннего представления используется линейное представление вместо AST.
+This architecture is not something new and is used in the `GCC` compiler family as well as in `llvm` based compilers, but they use a linear representation instead of AST as an internal representation. 
+as an internal representation instead of AST.
 
-**Пример AST**
+**A sample AST**
 
-Построим AST для примера из синтаксической справки:
+Let's build an AST for the example from the syntax help:
 
 <details>
   <summary><b>Полный код примера</b></summary>
@@ -161,27 +162,27 @@ int func (int a, int b, int c) {
 
 
 ![img.png](images/ast_tree.png)
-*Визуализация AST для примера из синтаксической справки*
+*AST visualization for the syntax help example*
 
-### Устройство бэкенда
+### The backend structure
 
-Сам бэкенд также имеет модульную структуру. Процесс компиляции AST в машинный код разбит на три этапа: 
-1. AST компилируется в линейное промежуточное представление (Backend IR) — массив структур, являющихся ассемблерным кодом
-для абстрактного стекового процессора (подробнее далее в секции Backend IR).
-2. После получения IR можно начать выполнять оптимизационные проходы, например убирать последовательные `push / pop` (_backend optimisations_). Однако в данный момент никакие оптимизации в бэкенде не применяются.
-3. Далее этот IR транслируется в инструкции для конкретной архитектуры процессора.
+The backend itself also has a modular structure. The process of compiling an AST into machine code is broken down into three steps: 
+1. the AST is compiled into a linear intermediate representation (Backend IR) - an array of structures that are assembly code
+for the abstract stack processor (more details later in the Backend IR section).
+2. Once the IR is obtained, you can start performing optimization passes, such as removing consecutive `push / pop` (_backend optimizations_). However, no optimizations are applied in the backend at this point.
+3. This IR is then translated into instructions for the specific processor architecture.
 
-При этом поскольку для разрешения адресов меток используется двухпроходная схема компиляции (_multi-pass compiler_), то этапы 1 и 3 выполняются два раза.
+In this case, since a two-pass compilation scheme (_multi-pass compiler_) is used to resolve label addresses, steps 1 and 3 are executed twice.
 
-#### Обоснование архитектуры бэкенда
-Бэкенд построен на тех же архитектурных принципах, что и компилятор в целом — разбиение на этапы для их переиспользования.
-Backend IR позволяет объединить трансляцию AST в набор элементарных действий для процессорных архитектур схожего типа или для 
-различных выходных форматов. Так, помимо компиляции в бинарный файл данный компилятор умеет работать в JIT режиме
-с минимальным дублированием кода.
+#### Rationale of the backend architecture
+The backend is built on the same architectural principles as the compiler as a whole - partitioning stages for their reuse.
+Backend IR allows AST translation to be combined into a set of elementary actions for processor architectures of similar type or for 
+different output formats. Thus, in addition to compiling to a binary file, this compiler is able to work in JIT mode
+with minimal code duplication.
 
 #### Backend IR
 
-В данном компиляторе в качестве IR используется связный список структур
+This compiler uses a linked list of structures as IR
 ```c++
     struct instruction_t {
         instruction_type_t type;            // Тип инструкции — push / add / call / etc
@@ -199,30 +200,30 @@ Backend IR позволяет объединить трансляцию AST в �
     };
 ```
 
-При этом IR рассчитан на абстрактный стековый процессор, а потому имеет следующие инструкции:
+In this case, IR is designed for an abstract stack processor, and therefore has the following instructions:
 
-| Команда            | Действие                                                                                                                                             |
+| Command | Action |
 |--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `push imm/reg/mem` | Положить в стек константу, значение из регистра или из оперативной памяти по адресу `reg + imm`, где один из операндов (`reg` или `imm`) опционален. |
-| `pop reg/mem`      | Извлечь из стека значение и положить его в регистр или оперативную память                                                                            |
-| `add/sub/mul/div`  | Арифметические операции с двумя верхними элементами на стеке (верхний элемент стека является правым операндом)                                       |
-| `sqrt / sin / cos` | Арифметические операции с один элементом на стеке                                                                                                    |
-| `call/jmp/j?? imm` | Совершить переход на адрес (номер структуры в IR). `j??` обозначает условные переходы (`ja, jae, jb, jbe, je, jne`)                                  |
-| `inp / out`        | Ввод / вывод верхнего элемента стека                                                                                                                 |
-| `ret`              | Команда возврата из функции, обратная к call                                                                                                         |
-| `halt`             | Завершение работы программы, аналог функции `abort()` в C                                                                                            |
+| `push imm/reg/mem` | Put a constant, a value from a register or from RAM on the stack at `reg + imm` where one of the operands (`reg` or `imm`) is optional.              |
+| `pop reg/mem`      | Extract a value from the stack and put it into a register or RAM `add/sub/mul/dem`                                                                   |
+| `add/sub/mul/div`  | Arithmetic operations with the top two elements on the stack (the top element of the stack is the right operand                                      |
+| `qrt / sin / cos`  | Arithmetic operations with one element on the stack                                                                                                  |
+| `call/jmp/j?? imm` | Jump to an address (structure number in IR). `j??` denotes conditional jumps (`ja, jae, jb, jbe, je, jne`)                                           |
+| `inp / out`        | Input / output of the top element of the stack                                                                                                       |
+| `ret`              | The return command from a function, the inverse of call                                                                                              |
+| `halt`             | Termination of the program, analogous to the `abort()` function in C                                                                                 |
 
-При этом все инструкции поглощают свои операнды, если таковые имеются, и при наличии возвращаемого значения кладут его на верхушку стека. 
+All instructions absorb their operands, if any, and place it on top of the stack if there is a return value. 
 
-### Структура ELF файла
-![img.png](images/elf_structure.png)
+### ELF file structure
+![img.png](images/self_structure.png)
 
-В результате компиляции создается исполняемый ELF файл, содержащий оттранслированный код и код стандартной библиотеки.
+As a result of compilation, an executable ELF file containing the translated code and standard library code is created.
 
-Для этого в исполняемый файл записывается следующая информация:
+To do this, the following information is written to the executable file:
 
-1. **Заголовок ELF файла** содержит общую информацию про бинарник: требуемую архитектуру процессора, адрес входа, количество и местоположение
-сегментных заголовков. 
+1. **The ELF file header** contains general information about the binary: the required processor architecture, the input address, the number and location of the
+segment headers. 
 
 ```c++
 const Elf64_Ehdr ELF_HEADER = {
@@ -256,10 +257,10 @@ const Elf64_Ehdr ELF_HEADER = {
 
 ```
 
-2. **Заголовки сегментов** содержат детальную информацию про каждый сегмент программы: права доступа, местоположение и размер в исполняемом файле, а также адрес, по которому его следует загружать.
-Данный компилятор использует лишь 4 сегмента:
+2. **Segment headers** contain detailed information about each program segment: access rights, location and size in the executable file, and the address where it should be loaded.
+This compiler uses only 4 segments:
 
-* **Служебный сегмент**
+* **Service Segment**
 ```c++
 Elf64_Phdr SYSTEM_PHEADER = {
         .p_type   = PT_LOAD,
@@ -273,9 +274,9 @@ Elf64_Phdr SYSTEM_PHEADER = {
 };
 ```
 
-Данный заголовок присутствует во всех исполняемых ELF файлах и загружает всю служебную информацию исполняемого файла по адресу `0x400000` с правами лишь на чтение.
+This header is present in all ELF executable files and loads all service information of the executable at `0x400000` with read-only permissions.
 
-* **Сегмент стандартной библиотеки**
+* **Standard Library Segment**
 ```c++
 Elf64_Phdr STDLIB_PHEADER = {
         .p_type   = PT_LOAD,
@@ -289,22 +290,22 @@ Elf64_Phdr STDLIB_PHEADER = {
 };
 ```
 
-Для простоты генерации исполняемого файла стандартная библиотека загружается в собственный сегмент по адресу `0x403000`
-с правами на исполнение. Поскольку код из исполняемого файла на самом деле не копируется, а лишь отображается в виртуальную память, то все сегменты обязаны
-начинаться с адресов, кратных размеру страницы — 4096 байт. Поэтому стандартная библиотека вынужденно записывается в бинарник начиная с
-4096 байта (`.p_offset`), а не сразу после сегментных заголовков.
+For ease of executable file generation, the standard library is loaded into its own segment at address ` 0x403000`
+with execution rights. Since the code from the executable file is not actually copied but only mapped into virtual memory, all segments must
+start at addresses that are multiples of the page size - 4096 bytes. Therefore, the standard library is forced to be written into the binary starting at the 4096 byte address (`.p.p.').
+4096 bytes (`.p_offset`) rather than immediately after the segment headers.
 
-* **Сегмент сгенерированного кода**
+* **Generated Code Segment**
 
-Сегмент сгенерированного кода отличается от стандартной библиотеки лишь адресом загрузки — `0x402000`, совпадающим 
-с адресом входа из ELF заголовка (поле `.e_entry`). Таким образом после загрузки ELF файла в память начинает
-исполняться именно этот сегмент.
+The generated code segment differs from the standard library only in the loading address, `0x402000`, which is the same as the input address from the ELF header. 
+with the input address from the ELF header (field `.e_entry`). Thus, after the ELF file is loaded into memory, this particular segment starts to be executed.
+this particular segment is executed.
 
-* **Сегмент оперативной памяти**
+* **Memory Segment**
 
-Главное отличие сегмента оперативной памяти от остальных — он не занимает места на диске. Вместо этого при загрузке ELF файла
-операционная система сама выделит область памяти заданного размера и заполнит ее нулями. Выражается это в нулевом поле
-`.p_filesz`, отвечающим за размер сегмента в файле, и ненулевом `.p_memsz`, отвечающим за размер после загрузки.
+The main difference between the RAM segment and the others is that it does not take up disk space. Instead, when an ELF file is loaded
+the operating system itself will allocate a memory area of a given size and fill it with zeros. This is expressed in the null field
+`.p_filesz`, which is responsible for the size of the segment in the file, and the non-zero `.p_memsz`, which is responsible for the size after loading.
 
 ```c++
 const Elf64_Phdr BSS_PHEADER = {
@@ -319,34 +320,34 @@ const Elf64_Phdr BSS_PHEADER = {
 };
 ```
 
-### Стандартная библиотека
+### Standard library
 
-В стандартной библиотеке ReverseLang реализованы следующие функции — ввод/вывод, извлечение квадратного корня и завершение программы (для инструкции halt).
-Данные функции написаны на ассемблере с прямым использованием системных вызовов, чтобы избежать необходимости
-линковки с glibc и последующего многократного усложнения структуры ELF файла. Исходный код stdlib находится в
+The following functions are implemented in the ReverseLang standard library - I/O, square root extraction, and program termination (for the halt instruction).
+These functions are written in assembler with direct use of system calls to avoid the necessity of
+linking with glibc and subsequent multiple complication of ELF file structure. The source code of stdlib is located in
 `src/asm_stdlib/stdlib.nasm`.
 
-Стандартная библиотека собирается в объектный файл для линковки с компилятором (где она используется в JIT режиме), а так же в исполняемый файл для удобства последующей обработки.
-При этом для ясности при запуске стандартной библиотеки как исполняемого файл она выведет справочное сообщение и завершит свою работу.
+The standard library is assembled into an object file for linking with the compiler (where it is used in JIT mode), as well as into an executable file for ease of further processing.
+For clarity, when you run the standard library as an executable, it will display a help message and terminate.
 
-Сборка стандартной библиотеки происходит автоматически с помощью make, однако это можно сделать и вручную:
+The standard library is built automatically with make, but it can also be built manually:
 ```bash
     $ cd src/asm_strlib
     $ nasm -f elf64 stdlib.asm                        # Сборка объектного файла
     $ ld -e stub_entry -s -S stdlib.o -o stdlib.out # Сборка бинарного файла
 ```
 
-Исполняемый файл используется при добавлении кода стандартной библиотеки в генерируемый бинарный файл. Компилятор загружает `stdlib.out`, анализирует его ELF заголовок и копирует содержащийся
-там код в выходной файл. Однако компилятору для обращения к функциям библиотеки также необходимо знать их смещения, информация о которых нельзя получить простым путем анализа заголовков сегментов.
-Поскольку в стандартной библиотеке мало функций и они практически никогда не меняются, было принято решение записать смещения функций как константы. 
+The executable is used when adding standard library code to the generated binary. The compiler loads `stdlib.out`, analyzes its ELF header, and copies the code it contains
+code contained therein into the output file. However, the compiler also needs to know the library functions' offsets to access them, information that cannot be obtained simply by analyzing segment headers.
+Since there are few functions in the standard library and they almost never change, it was decided to write function offsets as constants. 
 
-Узнать их можно с помощью утилиты `readelf`, проанализировав с ее помощью объектный файл стандартной библиотеки:
+You can find them out using the `readelf` utility by analyzing the standard library object file with its help:
 ```bash
     $ readelf -a stdlib.o
-        ... 48 строк пропущено ...
+        ... 48 lines missing ...
 
-Таблица символов «.symtab» содержит 16 элементов:
-   Чис:    Знач           Разм Тип     Связ   Vis      Индекс имени
+The symbol table ".symtab" contains 16 elements:
+   Num:     Value        Size Type  Connection Vis    Name Index
      0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
      1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS stdlib.nasm
      2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 .text
@@ -365,20 +366,20 @@ const Elf64_Phdr BSS_PHEADER = {
     15: 00000000000001fb     0 NOTYPE  GLOBAL DEFAULT    1 sqrt_asm
 ```
  
-Как видно из вывода этой программы, код `input_asm` находится в самом начале, `output_asm` начинается со смещения `0xAD` и так далее.
+As you can see from the output of this program, the `input_asm` code is at the very beginning, `output_asm` starts at offset `0xAD` and so on.
 
-### Сравнение времени работы
+#### Running Time Comparison
 
-Поскольку в предыдущем семестре был написан бэкенд для эмулятора стекового процессора (репозитории [бэкенда](https://github.com/foxidokun/ReverseLang) и [эмулятора](https://github.com/foxidokun/cpu)), то можно сравнить производительность нативного x64 кода с запуском на эмуляторе стекового процессора.
-Для сравнения измерим время работы двух программ: решение квадратного уравнения $2x² + 2x - 12 = 0$ и расчет 15-го числа Фибоначчи, код которых расположен в `examples/` (исходники: [уравнение](https://github.com/foxidokun/x64_compiler/blob/master/examples/quad_bench.edoc), [Фибоначчи](https://github.com/foxidokun/x64_compiler/blob/master/examples/fib_bench.edoc)). 
+Since a backend for the stack processor emulator was written in the previous semester (repositories [backend](https://github.com/foxidokun/ReverseLang) and [emulator](https://github.com/foxidokun/cpu)), we can compare the performance of native x64 code with running on the stack processor emulator.
+For comparison let's measure the running time of two programs: solving the quadratic equation $2x² + 2x - 12 = 0$ and calculating the 15th Fibonacci number, the code of which is located in `examples/` (sources: [equation](https://github.com/foxidokun/x64_compiler/blob/master/examples/quad_bench.edoc), [Fibonacci](https://github.com/foxidokun/x64_compiler/blob/master/examples/fib_bench.edoc)). 
 
-**Методика измерений**
+**Methodology of measurements**
 
-Для увеличения затраченного на выполнение программ времени и повышения точности измерений в каждой программе соответствующий алгоритм запускается 10000 раз.
-При этом дополнительно для каждой программы проводится пять запусков, результаты которых в последствии усредняются и считается погрешность.
+In order to increase the time spent on program execution and to increase the accuracy of measurements in each program the corresponding algorithm is run 10000 times.
+At the same time, five additional runs are performed for each program, the results of which are subsequently averaged and the error is calculated.
 
 <details>
-  <summary>Информация о тестовом стенде</summary>
+  <summary>Information about the test bench</summary>
 
 ```
     OS: Arch Linux (22.05.2023)
@@ -386,18 +387,18 @@ const Elf64_Phdr BSS_PHEADER = {
     CPU: Ryzen 7 4800H
     CPU Governor: perfomance (max frequency) 
     
-    Никаких программ, кроме тестируемой и служебных, во время измерений не запущено, а также тестируемой программе выдан максимальный приоритет (уровень nice выставлен в -20).
+    No programs, except for the program under test and service programs, are running during measurements, and the program under test is given maximum priority (nice level is set to -20).
 ```
 
 </details>
 
 
-Результаты измерений:
+Measurement results:
 
-| Программа            | x64             | stack cpu        | Ускорение       |
+| Program              | x64             | stack cpu        | Acceleration    |
 |----------------------|-----------------|------------------|-----------------|
-| Квадратное уравнение | `9.3  ± 0.2 ms` | `50.6  ± 0.5 ms` | `5.44 ± 0.03`   |
-| Число Фибоначчи      | `68.2 ± 0.7 ms` | `403.1 ± 0.9 ms` | `5.910 ± 0.012` |
+| Quadratic equation   | `9.3  ± 0.2 ms` | `50.6  ± 0.5 ms` | `5.44 ± 0.03`   |
+| Fibonacci number     | `68.2 ± 0.7 ms` | `403.1 ± 0.9 ms` | `5.910 ± 0.012` |
 
 
-Как видно из таблицы, использование нативной архитектуры вместо эмулятора дает значительный прирост в производительности (в 5.5 раз).
+As we can see from the table, using native architecture instead of emulator gives a significant performance gain (5.5 times).

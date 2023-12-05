@@ -1,0 +1,23 @@
+~sya~
+
+(x) print fn
+[
+    ; (x) __builtin_print__ return
+]
+
+(c, b, a) func fn
+[
+    ; b / a = d let
+    (b > a) if
+    {
+        ; c return
+    } else {
+        ; d return
+    }
+]
+
+; (1, 2, 3) func = ans let
+
+; (ans) print
+
+~nya~
